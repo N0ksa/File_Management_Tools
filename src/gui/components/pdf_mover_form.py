@@ -9,6 +9,10 @@ class PdfMoverForm(ttk.Frame):
         self.pdf_files = []  # Lista za pohranu PDF datoteka u odabranom direktoriju
         self.destination_folder = None  # Pohrana odredišne mape
 
+        self.columnconfigure(0, weight = 1)
+        self.rowconfigure(3, weight=1)
+
+
         # Dodavanje oznake za sekciju
         self.title_label = ttk.Label(self, text="Premještanje PDF datoteka", font=("Helvetica", 14, "bold"))
         self.title_label.grid(row=0, column=0, columnspan=2, pady=(10, 5))

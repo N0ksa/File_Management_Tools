@@ -9,6 +9,9 @@ class PdfRenamerForm(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
 
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(3, weight=1)
+
         # Dodavanje oznake za sekciju
         self.title_label = ttk.Label(self, text="Preimenovanje PDF datoteka", font=("Helvetica", 14, "bold"))
         self.title_label.grid(row=0, column=0, columnspan=2, pady=(10, 5))
