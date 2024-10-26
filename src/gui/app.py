@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
+from src.gui.components.image_to_pdf_converter_form import ImageToTextConverterForm
 from src.gui.components.pdf_mover_form import PdfMoverForm
 from src.gui.components.pdf_renamer_form import PdfRenamerForm
 
@@ -34,6 +35,11 @@ class Application(tk.Tk):
         # Kreiranje PdfMoverForm s desne strane
         self.pdf_mover_form = PdfMoverForm(self.main_frame)
         self.pdf_mover_form.grid(row=0, column=1, sticky="nsew", padx=(5, 0), pady=5)
+
+        # Kreiranje PdfConverterForm ispod ostalih
+        self.pdf_converter_form = ImageToTextConverterForm(self.main_frame)
+        self.pdf_converter_form.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=5,
+                                     pady=5)  # Span across both columns
 
 
 if __name__ == "__main__":
