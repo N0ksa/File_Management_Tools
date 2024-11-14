@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+packaging = "==24.1"
+pdf2image = "==1.17.0"
+pillow = "==11.0.0"
+pytesseract = "==0.3.13"
+numpy = "*"
+matplotlib = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.13"
