@@ -13,6 +13,7 @@ class PdfMoverForm(ttk.Frame):
         self.rowconfigure(3, weight=1)
 
 
+
         # Dodavanje oznake za sekciju
         self.title_label = ttk.Label(self, text="Premještanje PDF datoteka", font=("Helvetica", 14, "bold"))
         self.title_label.grid(row=0, column=0, columnspan=2, pady=(10, 5))
