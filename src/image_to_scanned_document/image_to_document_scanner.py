@@ -1,111 +1,133 @@
 import cv2
 import numpy as np
+import math
+from PIL import Image as PILImage
 
 
-class DocumentScanner:
-    def __init__(self, image_path):
-        """
-        Initialize the scanner with the image path.
-        """
-        self.image_path = image_path
-        self.input_image = cv2.imread(image_path)  # Read the image
-        self.resized_image = cv2.resize(self.input_image, (1800, 1600))  # Resize for processing (optional)
-        self.original_image = self.resized_image.copy()  # Make a copy of the original image
-        self.scanned_image = None  # Will hold the final scanned image
+class ImageToPdfScanner:
+    def __init__(self, input_image_path, output_pdf_path):
+        self.input_image_path = input_image_path
+        self.output_pdf_path = output_pdf_path
 
-    def reorder_points(self, points):
-        """
-        Reorder the points to make sure they are in the correct order:
-        top-left, top-right, bottom-right, bottom-left.
-        """
-        points = points.reshape((4, 2))
-        ordered_points = np.zeros((4, 2), dtype=np.float32)
+    def load_image(self):
+        image = cv2.imread(self.input_image_path, cv2.IMREAD_COLOR)
+        if image is None:
+            print(f"ERROR: Couldn't find an image at the path: {self.input_image_path}.")
+            exit()
+        return image
 
-        # Sum of the points' coordinates to find the top-left and bottom-right
-        sum_points = points.sum(axis=1)
-        ordered_points[0] = points[np.argmin(sum_points)]  # Top-left point
-        ordered_points[2] = points[np.argmax(sum_points)]  # Bottom-right point
+    def resize_image(self, image, width=800, height=600):
+        # Resize the image to the specified width and height for display
+        return cv2.resize(image, (width, height))
 
-        # Difference of the points' coordinates to find top-right and bottom-left
-        diff_points = np.diff(points, axis=1)
-        ordered_points[1] = points[np.argmin(diff_points)]  # Top-right point
-        ordered_points[3] = points[np.argmax(diff_points)]  # Bottom-left point
+    def preprocess_image(self, image):
+        # Step 0: Show original image
+        resized_original = self.resize_image(image)
+        cv2.imshow("Original Image", resized_original)  # Show original image
+        cv2.waitKey(0)
 
-        return ordered_points
+        # Step 1: Convert to grayscale
+        grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        resized_grayscale = self.resize_image(grayscale_image)
 
-    def process_image(self):
-        """
-        Process the image to find the document, extract the edges,
-        and apply a perspective transform.
-        """
-        # Convert the image to grayscale
-        gray_image = cv2.cvtColor(self.resized_image, cv2.COLOR_BGR2GRAY)
+        cv2.imshow("Grayscale Image", resized_grayscale)  # Show grayscale image
+        cv2.waitKey(0)
 
-        # Apply Gaussian blur to the grayscale image
-        blurred_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
+        # Step 2: Apply Gaussian Blur
+        blurred_image = cv2.GaussianBlur(grayscale_image, (99, 99), 0)
 
-        # Perform Canny edge detection
-        edges = cv2.Canny(blurred_image, 30, 50)
+        resized_blurred = self.resize_image(blurred_image)
+        cv2.imshow("Blurred Image", resized_blurred)  # Show blurred image
+        cv2.waitKey(0)
 
-        # Find contours in the edge-detected image
-        contours, hierarchy = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        # Step 3: Thresholding
+        _, binary_image = cv2.threshold(blurred_image, 90, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
-        # Sort contours based on area (largest contour first)
-        contours = sorted(contours, key=cv2.contourArea, reverse=True)
+        resized_binary = self.resize_image(binary_image)
+        cv2.imshow("Binary Image", resized_binary)  # Show binary image
+        cv2.waitKey(0)
 
-        # Find the contour with 4 corners (i.e., the document)
-        for contour in contours:
-            perimeter = cv2.arcLength(contour, True)
-            approx_corners = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
+        # Step 4: Find contours
+        contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-            if len(approx_corners) == 4:
-                document_contour = approx_corners
-                break
+        # Step 5: Draw contours in black and white
+        contour_image_bw = np.zeros_like(binary_image)  # Create a black image
+        cv2.drawContours(contour_image_bw, contours, -1, (255), 1)  # Draw white contours
 
-        # Reorder the points to ensure the correct corners (top-left, top-right, bottom-right, bottom-left)
-        ordered_points = self.reorder_points(document_contour)
+        resized_contour_bw = self.resize_image(contour_image_bw)
+        cv2.imshow("Contours (Black and White)", resized_contour_bw)  # Show contours in black and white
+        cv2.waitKey(0)
 
-        # Define the target points (for a new 800x800 image)
-        target_points = np.float32([[0, 0], [800, 0], [800, 800], [0, 800]])
+        # Step 6: Approximate polygon and calculate the corner points
+        largest_contour = max(contours, key=cv2.contourArea)
+        epsilon = 0.1 * cv2.arcLength(largest_contour, True)
+        approx_polygon = cv2.approxPolyDP(largest_contour, epsilon, True)
+        point1 = approx_polygon[0][0]
+        point2 = approx_polygon[1][0]
+        point3 = approx_polygon[2][0]
+        point4 = approx_polygon[3][0]
 
-        # Calculate the perspective transform matrix
-        perspective_matrix = cv2.getPerspectiveTransform(ordered_points, target_points)
+        # Draw approximated polygon on the image
+        approx_polygon_image = image.copy()
+        cv2.polylines(approx_polygon_image, [approx_polygon], isClosed=True, color=(0, 255, 0), thickness=3)
 
-        # Apply the perspective warp to the original image
-        self.scanned_image = cv2.warpPerspective(self.original_image, perspective_matrix, (800, 800))
+        resized_approx_image = self.resize_image(approx_polygon_image)
+        cv2.imshow("Approximated Polygon", resized_approx_image)  # Show approximated polygon
+        cv2.waitKey(0)
 
-    def save_scanned_image(self, output_path):
-        """
-        Save the final scanned result as a JPEG image.
-        """
-        if self.scanned_image is not None:
-            cv2.imwrite(output_path, self.scanned_image)
+        # Step 7: Calculate edges and decide on the corners' order
+        edge1 = math.sqrt(((point1[0] - point2[0]) ** 2) + ((point1[1] - point2[1]) ** 2))
+        edge2 = math.sqrt(((point2[0] - point3[0]) ** 2) + ((point2[1] - point3[1]) ** 2))
+        edge3 = math.sqrt(((point3[0] - point4[0]) ** 2) + ((point3[1] - point4[1]) ** 2))
+        edge4 = math.sqrt(((point4[0] - point1[0]) ** 2) + ((point4[1] - point1[1]) ** 2))
+
+        side_1 = round(min(edge1, edge3))
+        side_2 = round(min(edge2, edge4))
+
+        if side_1 > side_2:
+            height = side_1
+            width = side_2
+            ordered_corners = [point1, point4, point2, point3]
         else:
-            print("Error: No scanned image available to save.")
+            height = side_2
+            width = side_1
+            ordered_corners = [point2, point1, point3, point4]
 
-    def show_scanned_image(self):
-        """
-        Display the scanned image.
-        """
-        if self.scanned_image is not None:
-            cv2.imshow("Scanned Document", self.scanned_image)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-        else:
-            print("Error: No scanned image available to display.")
+        # Step 8: Perform perspective transform
+        source_points = np.float32(ordered_corners)
+        destination_points = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
+        perspective_matrix = cv2.getPerspectiveTransform(source_points, destination_points)
+
+        transformed_image = cv2.warpPerspective(image, perspective_matrix, (width, height))
+
+        resized_transformed = self.resize_image(transformed_image)
+        cv2.imshow("Transformed Image", resized_transformed)  # Show transformed image
+        cv2.waitKey(0)
+        return transformed_image
+
+    def save_image_as_pdf(self, transformed_image):
+        try:
+            pil_image = PILImage.fromarray(cv2.cvtColor(transformed_image, cv2.COLOR_BGR2RGB))
+            pil_image.save(self.output_pdf_path, "PDF")
+            print(f"Processed image saved as PDF to {self.output_pdf_path}")
+        except Exception as error:
+            print(f"ERROR: Unable to save image as PDF. {error}")
+
+    def process_and_save(self):
+        image = self.load_image()
+
+        try:
+            transformed_image = self.preprocess_image(image)
+        except Exception as error:
+            print(f"ERROR: {error}")
+            exit()
+
+        self.save_image_as_pdf(transformed_image)
 
 
-# Example Usage
 if __name__ == "__main__":
-    # Initialize the scanner with the image path
-    scanner = DocumentScanner(r"C:\Users\phant\Desktop\slika.jpg")
+    input_image_path = r"C:\Users\phant\Desktop\slika.jpg"
+    output_pdf_path = r"C:\Users\phant\Desktop\slikaOUT.pdf"
 
-    # Process the image to scan the document
-    scanner.process_image()
-
-    # Save the scanned result
-    output_path = r"C:\Users\phant\Desktop\scanned_output.jpg"
-    scanner.save_scanned_image(output_path)
-
-    # Optionally show the scanned image
-    scanner.show_scanned_image()
+    scanner = ImageToPdfScanner(input_image_path, output_pdf_path)
+    scanner.process_and_save()
