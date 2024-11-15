@@ -2,12 +2,13 @@ import os
 import re
 import pytesseract
 
+from src.config import TESSERACT_CMD
 from src.preprocessing import extract_text_from_pdf
 from src.utils import move_pdf_to_folder
 from src.utils import find_name_surname_date
 
 # Putanja do instalacije Tesseract OCR-a
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = TESSERACT_CMD
 
 
 # Funkcija za pronalaženje imena poslodavca

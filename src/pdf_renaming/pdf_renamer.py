@@ -4,7 +4,6 @@ from src.preprocessing import extract_text_from_pdf
 from src.utils import find_name_surname_date
 
 
-
 def rename_pdf(pdf_path, name_surname, date):
     try:
         new_filename = f"{name_surname} - Karton {date}.pdf"
