@@ -4,7 +4,7 @@ from tkinter import ttk, filedialog, messagebox
 from src.preprocessing.text_extraction import  extract_text_from_pdf, convert_image_to_txt
 
 
-class ImageToTextConverterForm(ttk.Frame):
+class TextConverterForm(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
 

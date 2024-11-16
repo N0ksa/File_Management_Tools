@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from src.gui.components.image_to_pdf_form import ImageToPdfForm
-from src.gui.components.to_text_converter_form import ImageToTextConverterForm
+from src.gui.components.to_text_converter_form import TextConverterForm
 from src.gui.components.pdf_mover_form import PdfMoverForm
 from src.gui.components.pdf_renamer_form import PdfRenamerForm
 
@@ -15,7 +15,7 @@ class Application(tk.Tk):
         super().__init__()
         self.title("File Management Tools")
         self.geometry("800x600")
-        self.configure(bg="#264653")  # Deep teal background for the main window
+        self.configure(bg="#F7F7F7")
 
         # Prevent resizing of the main window
         self.resizable(width=False, height=False)
@@ -42,7 +42,7 @@ class Application(tk.Tk):
 
         # Create and configure the style for the main frame
         self.style = ttk.Style()
-        self.style.configure('MainFrame.TFrame', background="#e9c46a")  # Light yellow for contrast
+        self.style.configure('MainFrame.TFrame', background="#F7F7F7")
 
         # Layout configuration
         self.columnconfigure(0, weight=1)
@@ -62,7 +62,8 @@ class Application(tk.Tk):
             text="File Management Tools",
             font=('Arial', 24, 'bold'),
             anchor="center",
-            background="#e9c46a",  # Match the frame background
+            background="#F7F7F7",
+            foreground="#3B6B9D",
         )
         self.title_label.grid(row=0, column=0, columnspan=2, pady=20)
 
@@ -97,7 +98,7 @@ class Application(tk.Tk):
         self.open_new_window(PdfMoverForm, "PDF Mover")
 
     def open_pdf_converter(self):
-        self.open_new_window(ImageToTextConverterForm, "PDF Converter")
+        self.open_new_window(TextConverterForm, "PDF Converter")
 
     def open_image_to_pdf(self):
         self.open_new_window(ImageToPdfForm, "Image to PDF")
