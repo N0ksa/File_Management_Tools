@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from src.gui.components.image_to_pdf_form import ImageToPdfForm
-from src.gui.components.image_to_text_converter_form import ImageToTextConverterForm
+from src.gui.components.to_text_converter_form import ImageToTextConverterForm
 from src.gui.components.pdf_mover_form import PdfMoverForm
 from src.gui.components.pdf_renamer_form import PdfRenamerForm
 
@@ -68,8 +68,8 @@ class Application(tk.Tk):
         buttons = [
             ("Otvori PDF Renamer", self.open_pdf_renamer),
             ("Otvori PDF Mover", self.open_pdf_mover),
-            ("Otvori Text Extractor", self.open_pdf_converter),
-            ("Otvori Image to PDF", self.open_image_to_pdf),
+            ("Otvori Image to PDF", self.open_image_to_pdf),  # Moved to appear before Text Extractor
+            ("Otvori Text Extractor", self.open_pdf_converter),  # Moved to appear after Image to PDF
         ]
 
         for idx, (text, command) in enumerate(buttons):

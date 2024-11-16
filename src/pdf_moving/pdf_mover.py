@@ -39,7 +39,7 @@ class PdfMover:
                 name_surname_date = find_name_surname_date(text)
 
                 employer = self.find_employer(text).replace('\n', ' ').strip()
-               
+
 
                 if name_surname_date and name_surname_date[0] and employer:
                     name_surname = name_surname_date[0]
