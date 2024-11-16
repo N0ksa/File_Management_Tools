@@ -7,46 +7,78 @@ class ImageToPdfForm(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
 
+        # Configure background and padding
+        self.configure(style='Custom.TFrame', padding=20)
+
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+
+        # For pushing the last button down
         self.rowconfigure(5, weight=1)
 
-        # Title label for the section
-        self.title_label = ttk.Label(self, text="Konverzija slike u skenirani pdf dokument", font=("Helvetica", 14, "bold"))
+        # Title label
+        self.title_label = ttk.Label(self, text="Konverzija slike u skenirani pdf dokument", font=("Helvetica", 14, "bold"),
+                                     style="Custom.TLabel")
         self.title_label.grid(row=0, column=0, columnspan=2, pady=(10, 5))
 
-        # Label for selecting image
-        self.image_label = ttk.Label(self, text="Odaberite sliku za konverziju:")
+        # Image selection label
+        self.image_label = ttk.Label(self, text="Odaberite sliku za konverziju:", style="Custom.TLabel")
         self.image_label.grid(row=1, column=0, columnspan=2, pady=(5, 5))
 
-        # Entry field for image path
-        self.image_path_entry = ttk.Entry(self)
+        # Image path entry
+        self.image_path_entry = ttk.Entry(self, style="Custom.TEntry")
         self.image_path_entry.grid(row=2, column=0, sticky="ew", padx=(0, 5))
         self.image_path_entry.insert(0, "Putanja do slike")
 
-        # Button to browse image
-        self.browse_image_button = ttk.Button(self, text="Odaberi sliku", command=self.browse_image)
+        # Browse button for image
+        self.browse_image_button = ttk.Button(self, text="Odaberi sliku", command=self.browse_image, style="Custom.TButton")
         self.browse_image_button.grid(row=2, column=1, sticky="ew")
 
-        # Label for selecting output path
-        self.output_label = ttk.Label(self, text="Odaberite izlaznu putanju za PDF:")
+        # Output folder label
+        self.output_label = ttk.Label(self, text="Odaberite izlaznu putanju za PDF:", style="Custom.TLabel")
         self.output_label.grid(row=3, column=0, columnspan=2, pady=(5, 5))
 
-        # Entry field for output path
-        self.output_path_entry = ttk.Entry(self)
+        # Output path entry
+        self.output_path_entry = ttk.Entry(self, style="Custom.TEntry")
         self.output_path_entry.grid(row=4, column=0, sticky="ew", padx=(0, 5))
         self.output_path_entry.insert(0, "Putanja za PDF")
 
-        # Button to browse output folder
-        self.browse_output_button = ttk.Button(self, text="Odaberi direktorij", command=self.browse_output_folder)
+        # Browse button for output folder
+        self.browse_output_button = ttk.Button(self, text="Odaberi direktorij", command=self.browse_output_folder, style="Custom.TButton")
         self.browse_output_button.grid(row=4, column=1, sticky="ew")
 
-        # Add a blank row (row 5) with weight for stretching the form vertically
-        self.rowconfigure(5, weight=1)  # Ensure that row 5 can expand
-
-        # Button to start the PDF conversion process
-        self.convert_button = ttk.Button(self, text="Konvertiraj u PDF", command=self.convert_image_to_pdf)
+        # Convert button
+        self.convert_button = ttk.Button(self, text="Konvertiraj u PDF", command=self.convert_image_to_pdf, style="Custom.TButton")
         self.convert_button.grid(row=6, column=0, columnspan=2, sticky="ew", pady=(10, 5))  # Put button in the last row
+
+        # Set styles
+        self.set_styles()
+
+    def set_styles(self):
+        """Set custom styles for the form."""
+        style = ttk.Style()
+
+        # Frame style with a soft ivory background
+        style.configure('Custom.TFrame', background='#fefae0')  # Ivory
+
+        # Label style
+        style.configure('Custom.TLabel', background='#fefae0', font=('Helvetica', 12), foreground='#34495e')  # Slate Gray
+
+        # Button style
+        style.configure('Custom.TButton',
+                        font=('Helvetica', 12),
+                        padding=10,
+                        background='#4caf50')  # Green
+        style.map('Custom.TButton',
+                  background=[('active', '#388e3c'),  # Darker green on hover
+                              ('pressed', '#2e7d32')])  # Even darker green on click
+
+        # Entry style with modern design and thickness
+        style.configure('Custom.TEntry',
+                        fieldbackground='#ffffff',  # White background
+                        bordercolor='#34495e',  # Slate Gray border
+                        padding=10,
+                        font=('Helvetica', 12))
 
     def browse_image(self):
         file_path = filedialog.askopenfilename(title="Odaberite sliku",
@@ -73,7 +105,6 @@ class ImageToPdfForm(ttk.Frame):
             messagebox.showwarning("Greška", "Molimo odaberite izlaznu putanju za PDF!")
             return
 
-        # Create an instance of ImageToPdfScanner
         scanner = ImageToPdfScanner(input_image_path, output_pdf_path)
 
         try:
@@ -81,3 +112,4 @@ class ImageToPdfForm(ttk.Frame):
             messagebox.showinfo("Uspjeh", f"PDF je uspješno spremljen na {output_pdf_path}")
         except Exception as e:
             messagebox.showerror("Greška", f"Došlo je do greške: {str(e)}")
+

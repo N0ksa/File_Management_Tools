@@ -123,11 +123,3 @@ class ImageToPdfScanner:
             exit()
 
         self.save_image_as_pdf(transformed_image)
-
-
-if __name__ == "__main__":
-    input_image_path = r"C:\Users\phant\Desktop\slika.jpg"
-    output_pdf_path = r"C:\Users\phant\Desktop\slikaOUT.pdf"
-
-    scanner = ImageToPdfScanner(input_image_path, output_pdf_path)
-    scanner.process_and_save()
