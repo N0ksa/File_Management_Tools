@@ -27,8 +27,6 @@ def convert_images_to_txt(image_paths: list, txt_path: str, languages='hrv+fra+d
             img = Image.open(img_path)
             extracted_text = extract_text_from_image(img, languages)
 
-            print(extracted_text + "TEST")
-
             all_extracted_text += extracted_text + "\n"
 
         except Exception as e:

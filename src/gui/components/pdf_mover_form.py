@@ -1,8 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-from src.pdf_moving import process_and_move_pdf
-
+from src.pdf_moving.pdf_mover import PdfMover  # Import PdfMover class
 
 class PdfMoverForm(ttk.Frame):
     def __init__(self, parent):
@@ -120,12 +119,12 @@ class PdfMoverForm(ttk.Frame):
 
     def move_selected_pdfs(self):
         """Move selected PDF files to the destination folder."""
-        if not self.pdf_files:
-            messagebox.showwarning("Upozorenje", "Niste učitali PDF datoteke.")
+        if not hasattr(self, 'destination_folder') or not self.destination_folder:
+            messagebox.showwarning("Upozorenje", "Niste odabrali odredišnu mapu.")
             return
 
-        if not self.destination_folder:
-            messagebox.showwarning("Upozorenje", "Niste odabrali odredišnu mapu.")
+        if not self.pdf_files:
+            messagebox.showwarning("Upozorenje", "Niste učitali PDF datoteke.")
             return
 
         selected_indices = self.file_listbox.curselection()
@@ -135,13 +134,15 @@ class PdfMoverForm(ttk.Frame):
 
         pdf_files_to_move = [self.pdf_files[index] for index in selected_indices]
 
+        # Create PdfMover instance and move the PDFs
+        pdf_mover = PdfMover(self.destination_folder)
+
         for pdf_path in pdf_files_to_move:
             try:
-                process_and_move_pdf(pdf_path, self.destination_folder)
+                pdf_mover.process_and_move_pdf(pdf_path)
                 print(f"Premješteno: {pdf_path}")
             except Exception as e:
                 messagebox.showerror("Greška", f"Greška prilikom premještanja {os.path.basename(pdf_path)}: {e}")
 
         messagebox.showinfo("Uspjeh", "Svi odabrani PDF-ovi su uspješno premješteni.")
         self.load_pdf_files(self.folder_path_entry.get())
-

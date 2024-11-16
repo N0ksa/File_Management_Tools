@@ -3,8 +3,6 @@ import re
 # Funkcija za pronalaženje imena, prezimena i datuma pregleda iz teksta
 def find_name_surname_date(text):
     try:
-        print("Text for search:")
-        print(text)
 
         # Existing name and surname patterns
         name_surname_pattern_1 = re.compile(r'Prezime i ime:\s*([A-ZČĆŽŠĐ]+)\s*([A-ZČĆŽŠĐa-zčćžšđ]+)', re.IGNORECASE)

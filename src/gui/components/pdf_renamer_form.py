@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import os
 import concurrent.futures
-from src.pdf_renaming.pdf_renamer import process_and_rename_pdf
+from src.pdf_renaming.pdf_renamer import PdfRenamer  # Import the PdfRenamer class
 
 
 class PdfRenamerForm(ttk.Frame):
@@ -109,7 +109,9 @@ class PdfRenamerForm(ttk.Frame):
 
         pdf_files_to_process = [os.path.join(folder_path, self.pdf_listbox.get(index)) for index in selected_files]
 
+        # Create a PdfRenamer instance and process PDFs
+        pdf_renamer = PdfRenamer(folder_path, pdf_files_to_process)
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.map(process_and_rename_pdf, pdf_files_to_process)
+            executor.submit(pdf_renamer.process_pdfs)
 
         messagebox.showinfo("Uspjeh", "PDF datoteke su uspješno obrađene.")
