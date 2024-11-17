@@ -109,9 +109,25 @@ class PdfRenamerForm(ttk.Frame):
 
         pdf_files_to_process = [os.path.join(folder_path, self.pdf_listbox.get(index)) for index in selected_files]
 
-        # Create a PdfRenamer instance and process PDFs
-        pdf_renamer = PdfRenamer(folder_path, pdf_files_to_process)
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.submit(pdf_renamer.process_pdfs)
 
-        messagebox.showinfo("Uspjeh", "PDF datoteke su uspješno obrađene.")
+        pdf_renamer = PdfRenamer(folder_path, pdf_files_to_process)
+
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(pdf_renamer.process_pdfs)
+
+        total_success, total_error = future.result()
+
+        if total_success > 0 and total_error == 0:
+            messagebox.showinfo("Uspjeh", f"Obrada je završena!\n\n"
+                                          f"Uspješno preimenovano: {total_success} PDF datoteka")
+
+        elif total_success > 0:
+            messagebox.showinfo("Uspjeh", f"Obrada je završena!\n\n"
+                                          f"Uspješno preimenovano: {total_success} PDF datoteka\n"
+                                f"Neuspješno preimenovano: {total_error} PDF datoteka. Pogledajte log datoteku za više detalja")
+
+        else:
+            messagebox.showerror("Neuspjeh",
+                                 f"Niti jedna PDF datoteka nije uspješno preimenovana.\n\n"
+                                 "Molimo provjerite log datoteku za više detalja o greškama.")
