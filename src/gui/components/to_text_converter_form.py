@@ -1,120 +1,114 @@
 import os
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-from src.preprocessing.text_extraction import  extract_text_from_pdf, convert_image_to_txt
+from src.preprocessing.text_extraction import extract_text_from_pdf, convert_image_to_txt
 from src.utils.exception_handler import ExceptionHandler
-
+import threading
 
 class TextConverterForm(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.exception_handler = ExceptionHandler()
 
-
         self.configure(style='Custom.TFrame', padding=20)
 
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(3, weight=1)
+        self.columnconfigure(1, weight=1)
+
+        self.rowconfigure(6, weight=1)
 
 
-        self.title_label = ttk.Label(self, text="Ekstrakcija teksta iz slike ili PDF-a", font=("Arial", 16, "bold"),
+        self.title_label = ttk.Label(self, text="Ekstrakcija teksta iz slike ili PDF-a", font=("Helvetica", 14, "bold"),
                                      style="Custom.TLabel")
-        self.title_label.grid(row=0, column=0, columnspan=2, pady=(10, 15))
+        self.title_label.grid(row=0, column=0, columnspan=2, pady=(10, 5))
 
 
         self.label = ttk.Label(self, text="Odaberite sliku ili PDF za ekstrakciju teksta:", style="Custom.TLabel")
-        self.label.grid(row=1, column=0, columnspan=2, pady=(5, 10))
+        self.label.grid(row=1, column=0, columnspan=2, pady=(5, 5))
 
 
         self.folder_path_entry = ttk.Entry(self, style="Custom.TEntry")
-        self.folder_path_entry.grid(row=2, column=0, sticky="ew", padx=(0, 10))
-        self.folder_path_entry.insert(0, "Putanja do direktorija")
+        self.folder_path_entry.grid(row=2, column=0, sticky="ew", padx=(0, 5))
+        self.folder_path_entry.insert(0, "Putanja do slike ili PDF-a")
 
 
-        self.browse_button = ttk.Button(self, text="Odaberi sliku ili PDF", command=self.browse_file,
-                                        style="Custom.TButton")
-        self.browse_button.grid(row=2, column=1, sticky="ew")
+        self.browse_button = ttk.Button(self, text="Odaberi sliku ili PDF", style="Custom.TButton", command=self.browse_file)
+        self.browse_button.grid(row=2, column=1, sticky="ew", padx=(5, 0))
 
 
-        self.listbox_frame = ttk.Frame(self)
-        self.listbox_frame.grid(row=3, column=0, columnspan=2, sticky="nsew", pady=(10, 15))
-
-        self.file_listbox = tk.Listbox(self.listbox_frame, selectmode=tk.SINGLE, height=10, bg="#f9f9f9", bd=0,
-                                       highlightthickness=1, font=("Arial", 10))
-        self.file_listbox.pack(fill=tk.BOTH, expand=True, padx=(5, 0), pady=5)
+        self.output_label = ttk.Label(self, text="Odaberite izlaznu putanju za tekst:", style="Custom.TLabel")
+        self.output_label.grid(row=3, column=0, columnspan=2, pady=(5, 5))
 
 
-        scrollbar = ttk.Scrollbar(self.listbox_frame, orient=tk.VERTICAL, command=self.file_listbox.yview)
-        self.file_listbox.configure(yscrollcommand=scrollbar.set)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.output_path_entry = ttk.Entry(self, style="Custom.TEntry")
+        self.output_path_entry.grid(row=4, column=0, sticky="ew", padx=(0, 5))
+        self.output_path_entry.insert(0, "Putanja za spremanje teksta")
 
 
-        self.extract_button = ttk.Button(self, text="Ekstrahiraj tekst", command=self.extract_text_from_file,
-                                         style="Custom.TButton")
-        self.extract_button.grid(row=4, column=0, columnspan=2, sticky="ew", pady=(5, 10))
+        self.browse_output_button = ttk.Button(self, text="Odaberi izlaznu putanju", style="Custom.TButton", command=self.browse_output)
+        self.browse_output_button.grid(row=4, column=1, sticky="ew", padx=(5, 0))
 
-        self.file_path = None
 
-        self.set_styles()
+        self.progressbar = ttk.Progressbar(self, orient="horizontal", mode="indeterminate", length=300)
+        self.progressbar.grid(row=5, column=0, columnspan=2, pady=(10, 15))
+        self.progressbar.grid_remove()
 
-    def set_styles(self):
 
-        style = ttk.Style()
-
-        style.configure('Custom.TFrame', background='#fefae0')  # Ivory
-
-        style.configure('Custom.TLabel', background='#fefae0', font=('Arial', 14), foreground='#34495e')  # Slate Gray
-
-        style.configure('Custom.TButton',
-                        font=('Arial', 12),
-                        padding=10,
-                        background='#4caf50')  # Green
-        style.map('Custom.TButton',
-                  background=[('active', '#388e3c'),  # Darker green on hover
-                              ('pressed', '#2e7d32')])  # Even darker green on click
-
-        style.configure('Custom.TEntry',
-                        fieldbackground='#ffffff',  # White background
-                        bordercolor='#34495e',  # Slate Gray border
-                        padding=10,
-                        font=('Arial', 12))
+        self.extract_button = ttk.Button(self, text="Ekstrahiraj tekst", style="Custom.TButton", command=self.start_text_extraction_thread)
+        self.extract_button.grid(row=6, column=0, columnspan=2, pady=(20, 10))
 
     def browse_file(self):
-
-        file_path = filedialog.askopenfilename(title="Odaberite sliku ili PDF",
-                                               filetypes=(("Image Files", "*.jpg;*.jpeg;*.png;*.bmp"),
-                                                          ("PDF Files", "*.pdf")))
+        file_path = filedialog.askopenfilename(title="Odaberite sliku ili PDF", filetypes=[("Image files", "*.jpg;*.jpeg;*.png;*.bmp"), ("PDF files", "*.pdf")])
         if file_path:
-            self.file_path = file_path
-            self.update_listbox()
+            self.folder_path_entry.delete(0, tk.END)
+            self.folder_path_entry.insert(0, file_path)
 
-    def update_listbox(self):
-        self.file_listbox.delete(0, tk.END)
-        if self.file_path:
-            self.file_listbox.insert(tk.END, os.path.basename(self.file_path))
+    def browse_output(self):
+        file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
+        if file_path:
+            self.output_path_entry.delete(0, tk.END)
+            self.output_path_entry.insert(0, file_path)
 
-    def extract_text_from_file(self):
-        if not self.file_path:
-            messagebox.showwarning("Upozorenje", "Niste odabrali sliku ili PDF za ekstrakciju!")
+    def start_text_extraction_thread(self):
+        input_file_path = self.folder_path_entry.get()
+        output_txt_path = self.output_path_entry.get()
+
+        if not input_file_path or not os.path.isfile(input_file_path):
+            messagebox.showwarning("Pogreška", "Molim odaberite valjanu sliku ili PDF!")
             return
 
-        txt_path = filedialog.asksaveasfilename(defaultextension=".txt",
-                                                filetypes=[("Text files", "*.txt")])
-        if txt_path:
-            try:
+        if not output_txt_path or output_txt_path == "Putanja za spremanje teksta":
+            messagebox.showwarning("Pogreška", "Molim odaberite odredište za tekst datoteku!")
+            return
 
-                if self.file_path.lower().endswith('.pdf'):
-                    extracted_text = extract_text_from_pdf(self.file_path)
-                else:
-                    extracted_text = convert_image_to_txt(self.file_path)
+        output_directory = os.path.dirname(output_txt_path)
+        if not os.path.isdir(output_directory):
+            messagebox.showwarning("Pogreška", "Odabrana izlazna putanja ne postoji!")
+            return
+
+        self.extract_button.config(state=tk.DISABLED)
+        self.progressbar.grid()
+        self.progressbar.start()
+
+        threading.Thread(target=self.extract_and_save_text, args=(input_file_path, output_txt_path)).start()
+
+    def extract_and_save_text(self, input_file_path, output_txt_path):
+        try:
+
+            if input_file_path.lower().endswith('.pdf'):
+                extracted_text = extract_text_from_pdf(input_file_path)
+            else:
+                extracted_text = convert_image_to_txt(input_file_path)
 
 
+            with open(output_txt_path, 'w', encoding='utf-8') as text_file:
+                text_file.write(extracted_text)
 
-                with open(txt_path, 'w', encoding='utf-8') as text_file:
-                    text_file.write(extracted_text)
+            self.after(0, lambda: messagebox.showinfo("Uspjeh", f"Tekst je uspješno ekstrahiran: {output_txt_path}"))
+        except Exception as e:
+            self.exception_handler.log_exception(e)
+            self.after(0, lambda: messagebox.showerror("Greška", "Došlo je do greške prilikom ekstrakcije teksta. Pogledajte log za detalje."))
 
-                messagebox.showinfo("Uspjeh", f"Tekst je uspješno ekstrahiran: {txt_path}")
 
-            except Exception as e:
-                self.exception_handler.log_exception(e)
-                messagebox.showerror("Greška", "Došlo je do greške prilikom ekstrakcije teksta, za više informacija pogledajte log.")
+        self.after(0, lambda: self.extract_button.config(state=tk.NORMAL))
+        self.after(0, lambda: self.progressbar.grid_remove())
