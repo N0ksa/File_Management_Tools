@@ -11,46 +11,71 @@ class ImageToPdfForm(ttk.Frame):
         super().__init__(parent)
         self.exception_handler = ExceptionHandler()
 
-        self.configure(style='Custom.TFrame', padding=20)
+
+        self.configure(style='Form.TFrame', padding=20)
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
 
         self.rowconfigure(6, weight=1)
 
-        self.title_label = ttk.Label(self, text="Konverzija slike u skenirani pdf dokument", font=("Helvetica", 14, "bold"),
-                                     style="Custom.TLabel")
-        self.title_label.grid(row=0, column=0, columnspan=2, pady=(10, 5))
 
-        self.image_label = ttk.Label(self, text="Odaberite sliku za konverziju:", style="Custom.TLabel")
+        self.title_label = ttk.Label(
+            self,
+            text="Konverzija slike u skenirani PDF dokument",
+            style="FormTitle.TLabel",
+        )
+        self.title_label.grid(row=0, column=0, columnspan=2, pady=(10, 20))
+
+
+        self.image_label = ttk.Label(self, text="Odaberite sliku za konverziju:", style="Form.TLabel")
         self.image_label.grid(row=1, column=0, columnspan=2, pady=(5, 5))
+
 
         self.image_path_entry = ttk.Entry(self, style="Custom.TEntry")
         self.image_path_entry.grid(row=2, column=0, sticky="ew", padx=(0, 5))
         self.image_path_entry.insert(0, "Putanja do slike")
 
-        self.browse_image_button = ttk.Button(self, text="Odaberi sliku", style="Custom.TButton",
-                                              command=self.browse_image)
+
+        self.browse_image_button = ttk.Button(
+            self,
+            text="Odaberi sliku",
+            style="Form.TButton",
+            command=self.browse_image,
+        )
         self.browse_image_button.grid(row=2, column=1, sticky="ew", padx=(5, 0))
 
-        self.output_label = ttk.Label(self, text="Odaberite izlaznu putanju:", style="Custom.TLabel")
+
+        self.output_label = ttk.Label(self, text="Odaberite izlaznu putanju:", style="Form.TLabel")
         self.output_label.grid(row=3, column=0, columnspan=2, pady=(5, 5))
 
 
-        self.output_path_entry = ttk.Entry(self, style="Custom.TEntry")
+        self.output_path_entry = ttk.Entry(self,style="Custom.TEntry")
         self.output_path_entry.grid(row=4, column=0, sticky="ew", padx=(0, 5))
         self.output_path_entry.insert(0, "Putanja za spremanje")
 
-        self.browse_output_button = ttk.Button(self, text="Odaberi izlaznu putanju", style="Custom.TButton",
-                                               command=self.browse_output)
+
+        self.browse_output_button = ttk.Button(
+            self,
+            text="Odaberi izlaznu putanju",
+            style="Form.TButton",
+            command=self.browse_output,
+        )
         self.browse_output_button.grid(row=4, column=1, sticky="ew", padx=(5, 0))
 
-        self.convert_button = ttk.Button(self, text="Konvertiraj", style="Custom.TButton", command=self.start_conversion_thread)
+
+        self.convert_button = ttk.Button(
+            self,
+            text="Konvertiraj",
+            style="Form.TButton",
+            command=self.start_conversion_thread,
+        )
         self.convert_button.grid(row=5, column=0, columnspan=2, pady=(20, 10))
+
 
         self.progressbar = ttk.Progressbar(self, orient="horizontal", mode="indeterminate", length=300)
         self.progressbar.grid(row=6, column=0, columnspan=2, pady=(10, 15))
-        self.progressbar.grid_remove()  # Initially hide the progress bar
+        self.progressbar.grid_remove()  # Skriven na početku
 
     def browse_image(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg")])
@@ -97,7 +122,6 @@ class ImageToPdfForm(ttk.Frame):
             self.exception_handler.log_exception(e)
             self.after(0, lambda: self.exception_handler.show_user_message(
                 "Dogodila se pogreška. Za više detalja pogledajte log datoteku."))
-
 
         self.after(0, lambda: self.convert_button.config(state=tk.NORMAL))
         self.after(0, lambda: self.progressbar.grid_remove())

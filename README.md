@@ -13,8 +13,8 @@ Ova aplikacija omogućava automatsko skeniranje, organizaciju i preimenovanje PD
 Na primjer: Liječničke_svjedodžbe/Prezime/LIJEČNIČKA_SVJEDOŽBA - Ime_Prezime
 
 
-### 3. **Prepoznavanje i ekstrakcija teksta sa slika**
-- Prepoznaje tekst sa slika  i izdvaja ga za daljnju obradu u novu .txt datoteku.
+### 3. **Prepoznavanje i ekstrakcija teksta iz slika ili PDF datoteka**
+- Prepoznaje tekst sa slika ili PDF datoteka  i izdvaja ga za daljnju obradu u novu .txt datoteku.
 
 ### 4. **Pretvorba slika u skenirane PDF dokumente**
 - Aplikacija omogućava pretvorbu slika (slike s dokumentima u sebi) u PDF format.
