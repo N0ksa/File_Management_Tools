@@ -11,33 +11,26 @@ def main():
     app = Application()
     app.mainloop()
 
-
 class Application(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        self.text_extractor_icon = None
-        self.image_to_pdf_icon = None
-        self.pdf_mover_icon = None
-        self.pdf_renamer_icon = None
+        self.current_theme = 'light'  # Track the current theme
+
         self.title("File Management Tools")
         self.geometry("800x600")
         self.configure(bg="#F7F7F7")
 
-
         self.resizable(width=False, height=False)
         self.minsize(800, 600)
 
-
         self.iconphoto(False, tk.PhotoImage(file="../../resources/icons/main_icon.png"))
 
-
+        self.style = ttk.Style(self)
         self.set_global_styles()
-
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-
 
         self.main_frame = ttk.Frame(self, style='MainFrame.TFrame', padding=20)
         self.main_frame.grid(row=0, column=0, sticky="nsew")
@@ -45,7 +38,6 @@ class Application(tk.Tk):
         self.main_frame.columnconfigure(1, weight=1)
         self.main_frame.rowconfigure(1, weight=1)
         self.main_frame.rowconfigure(2, weight=1)
-
 
         self.title_label = ttk.Label(
             self.main_frame,
@@ -57,12 +49,12 @@ class Application(tk.Tk):
         self.title_label.grid(row=0, column=0, columnspan=2, pady=20)
 
         self.create_buttons()
+        self.create_image_toggle()
 
     def set_global_styles(self):
-        set_global_styles(ttk.Style(self))
+        set_global_styles(self.style, self.current_theme)
 
     def create_buttons(self):
-
         self.pdf_renamer_icon = tk.PhotoImage(file="../../resources/icons/pdf_renamer.png").subsample(6, 6)
         self.pdf_mover_icon = tk.PhotoImage(file="../../resources/icons/pdf_mover.png").subsample(5, 5)
         self.image_to_pdf_icon = tk.PhotoImage(file="../../resources/icons/image_scanner.png").subsample(6, 6)
@@ -77,8 +69,47 @@ class Application(tk.Tk):
 
         for idx, (text, command, icon) in enumerate(buttons):
             row, col = divmod(idx, 2)
-            button = ttk.Button(self.main_frame, text=text, command=command, style='Elevated.TButton', image=icon, compound=tk.BOTTOM)
+            button = ttk.Button(
+                self.main_frame,
+                text=text,
+                command=command,
+                style='Elevated.TButton',
+                image=icon,
+                compound=tk.BOTTOM
+            )
             button.grid(row=row + 1, column=col, sticky="nsew", padx=20, pady=(20, 20))
+
+    def create_image_toggle(self):
+
+        self.image_on = tk.PhotoImage(file="../../resources/icons/light_mode.png").subsample(20, 20)
+        self.image_off = tk.PhotoImage(file="../../resources/icons/night_mode.png").subsample(20, 20)
+
+
+        self.toggle_label = tk.Label(self, image=self.image_off, bg="#F7F7F7", cursor="hand2")
+        self.toggle_label.place(relx=1.0, rely=0.0, anchor="ne", x=-10, y=10)
+
+
+        self.toggle_label.bind("<Button-1>", self.toggle_theme)
+
+    def toggle_theme(self, event=None):
+
+        self.current_theme = 'dark' if self.current_theme == 'light' else 'light'
+
+
+        new_image = self.image_on if self.current_theme == 'dark' else self.image_off
+        self.toggle_label.configure(image=new_image)
+
+
+        new_bg = "#2B3A42" if self.current_theme == 'dark' else "#F7F7F7"
+        self.configure(bg=new_bg)
+        self.toggle_label.configure(bg=new_bg)
+
+
+        self.set_global_styles()
+        self.update_theme()
+
+    def update_theme(self):
+        self.configure(bg=self.style.lookup('MainFrame.TFrame', 'background'))
 
     def open_pdf_renamer(self):
         self.open_new_window(PdfRenamerForm, "PDF Renamer")
@@ -97,7 +128,6 @@ class Application(tk.Tk):
         new_window.title(title)
         new_window.geometry("700x500")
         new_window.configure(bg="#F7F7F7")
-
 
         new_window.resizable(width=False, height=False)
 
