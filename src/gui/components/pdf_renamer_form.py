@@ -45,7 +45,7 @@ class PdfRenamerForm(ttk.Frame):
         self.browse_button.grid(row=2, column=1, sticky="ew")
 
 
-        self.listbox_frame = ttk.Frame(self)
+        self.listbox_frame = ttk.Frame(self, style="Form.TFrame")
         self.listbox_frame.grid(row=3, column=0, columnspan=2, sticky="nsew", pady=(10, 15))
 
         self.pdf_listbox = tk.Listbox(
