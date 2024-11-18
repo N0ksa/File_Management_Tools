@@ -15,7 +15,11 @@ class Application(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        self.current_theme = 'light'  # Track the current theme
+        self.text_extractor_icon = None
+        self.image_to_pdf_icon = None
+        self.pdf_mover_icon = None
+        self.pdf_renamer_icon = None
+        self.current_theme = 'light'
 
         self.title("File Management Tools")
         self.geometry("800x600")
