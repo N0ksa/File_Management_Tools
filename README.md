@@ -32,8 +32,8 @@ Aplikacija koristi sljedeće biblioteke i alate:
 - **Regularni izrazi** – za identifikaciju i prepoznavanje tipa dokumenta temeljenog na tekstu.
 
 ## Demo
-  ### 1. **Skeniranje slike u PDF dokument**
-   ![Skeniranje slike u pdf dokument](https://github.com/user-attachments/assets/739b86de-c938-414a-b76c-43f2d986ca4b)
+  ### 1. **Skeniranje slike u PDF dokument** 
+  ![Skeniranje slike u pdf dokument](https://github.com/user-attachments/assets/4563ef37-1bb4-4352-b03d-b590308031e8)
 
   ### 2. **Pretvorba sadržaja slike ili pdf-a u tekst**
   ![Pretvorba slike u tekst](https://github.com/user-attachments/assets/6bc40a2d-71e0-4ce1-af75-cf474fca3460)
