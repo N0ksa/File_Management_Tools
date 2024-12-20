@@ -31,3 +31,14 @@ Aplikacija koristi sljedeće biblioteke i alate:
 - **pdf2image** – za konverziju PDF dokumenata u slike kako bi se omogućila obrada njihovog sadržaja.
 - **Regularni izrazi** – za identifikaciju i prepoznavanje tipa dokumenta temeljenog na tekstu.
 
+## Demo
+  ### 1. **Skeniranje slike u PDF dokument**
+   ![Skeniranje slike u pdf dokument](https://github.com/user-attachments/assets/739b86de-c938-414a-b76c-43f2d986ca4b)
+
+  ### 2. **Pretvorba sadržaja slike ili pdf-a u tekst**
+  ![Pretvorba slike u tekst](https://github.com/user-attachments/assets/6bc40a2d-71e0-4ce1-af75-cf474fca3460)
+
+  ### 3. **Automatsko preimenovanje i premještanje pdf-a s obzirom na njegov sadržaj**
+  ![Premještanje i preimenovanje](https://github.com/user-attachments/assets/0f75d74d-d1d3-4667-8a59-429ba2994660)
+
+
